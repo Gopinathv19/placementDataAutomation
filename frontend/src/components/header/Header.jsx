@@ -1,46 +1,43 @@
 import React, { useState } from "react"
 import "./header.css"
 import Head from "../head/Head"
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined"
-import InvertColorsOutlinedIcon from "@mui/icons-material/InvertColorsOutlined"
-import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined"
-import SupportOutlinedIcon from "@mui/icons-material/SupportOutlined"
-import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined"
 import MenuIcon from "@mui/icons-material/Menu"
 import CloseIcon from "@mui/icons-material/Close"
+import GroupIcon from '@mui/icons-material/Group';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 
-const Header = ({ dark, setMode }) => {
+const Header = ({ dark, setMode, onProfileSelect }) => {
   // Toogle Menu
   const [Mobile, setMobile] = useState(false)
   return (
     <>
       <section className='header'>
-        <Head dark={dark} setMode={setMode} />
+        <Head 
+          dark={dark} 
+          setMode={setMode} 
+          onProfileSelect={onProfileSelect}
+        />
         <header>
           <div className='container'>
             {/*<ul className='navMenu'>*/}
             <ul className={Mobile ? "navMenu-list" : "link"} onClick={() => setMobile(false)}>
               <li>
                 <a href='/' className='navIcon'>
-                  <DashboardOutlinedIcon className='navIcon active' />
-                  Performance
+                  <LocalFireDepartmentIcon className='navIcon active' />
+                  Performance Tracker
                 </a>
               </li>
               <li>
-                <InvertColorsOutlinedIcon className='navIcon' />
-                <a href='/'>A</a>
+                <GroupIcon className='navIcon' />
+                <a href='/tracker/a'>A</a>
               </li>
               <li>
-                <GridViewOutlinedIcon className='navIcon' />
-                <a href='/'>B</a>
+                <GroupIcon className='navIcon' />
+                <a href='tracker/b'>B</a>
               </li>
               <li>
-                <SupportOutlinedIcon className='navIcon' />
-                <a href='/'>C</a>
-              </li>
-              <li>
-                <StyleOutlinedIcon className='navIcon' />
-                <a href='/'>Leetcode</a>
+                <GroupIcon className='navIcon' />
+                <a href='tracker/c'>C</a>
               </li>
             </ul>
             <button className='toggle' onClick={() => setMobile(!Mobile)}>

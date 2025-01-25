@@ -1,6 +1,10 @@
 .project {
   margin-top: 50px;
+  margin-left: 0px;
   display: flex;
+  flex-direction:row;
+  padding:0 10px;
+  width:100%;
 }
 .project .user {
   flex: 2;
@@ -32,6 +36,7 @@
 }
 .tableBox {
   margin-top: 20px;
+  margin-left: 0px;
 }
 .light .tableContainer {
   background-color: #fff !important;

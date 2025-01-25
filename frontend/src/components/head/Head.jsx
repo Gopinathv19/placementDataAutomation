@@ -1,12 +1,12 @@
 import React, { useState, useEffect} from "react"
 // import { useNavigate } from "react-router-dom"
-import SettingsIcon from "@mui/icons-material/Settings"
+import MaterialUISwitch from "@mui/material/Switch"
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import axios from "axios"
 import "./head.css"
 
 
-const Head = ({ dark, setMode }) => {
+const Head = ({ dark, setMode, onProfileSelect }) => {
   // const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState([])
@@ -60,7 +60,7 @@ const Head = ({ dark, setMode }) => {
   const handleResultClick = (result) => {
     setSearchTerm('');
     setSearchResults([]);
-    // navigate(`/profile/${result.universityNo}`);
+    onProfileSelect(result);
   }
 
   return (
@@ -102,9 +102,11 @@ const Head = ({ dark, setMode }) => {
                 </div>
               )}
             </div>
-            <button onClick={() => setMode(!dark)}>
-              <SettingsIcon className='iconHead' />
-            </button>
+            <MaterialUISwitch
+              checked={dark}
+              onChange={() => setMode(!dark)}
+              sx={{ m: 1 }}
+            />
           </div>
         </div>
       </section>

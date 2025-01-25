@@ -1,0 +1,73 @@
+.profile-container {
+  padding: 2rem;
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(26, 26, 26, 0.95);
+}
+
+.profile-card {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.profile-avatar {
+  border: 3px solid #ff4d4d;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.student-name {
+  color: #ffffff;
+  font-weight: 600 !important;
+}
+
+.university-no {
+  color: #b3b3b3;
+}
+
+.stats-card {
+  background-color: #363636 !important;
+  color: #ffffff !important;
+  height: 100%;
+  border-radius: 8px !important;
+}
+
+.progress-chart {
+  text-align: center;
+}
+
+.total-solved {
+  margin-top: -2rem !important;
+  color: #ff4d4d;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.activity-item {
+  padding: 0.5rem;
+  background-color: #2d2d2d;
+  border-radius: 4px;
+  color: #b3b3b3;
+} 

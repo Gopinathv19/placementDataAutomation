@@ -4,7 +4,7 @@ import axios from "axios"
 import "./cards.css"
 import Common from "../../common/Common"
 
-const Cards = () => {
+const Cards = ({ sectionData }) => {
   const [eligibilityData, setEligibilityData] = useState([189, 11]);
   const [genderData, setGenderData] = useState([55, 45]);
   const [loading, setLoading] = useState(true);

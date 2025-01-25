@@ -11,8 +11,8 @@ const Home = () => {
       <section className='home'>
         <div className='container'>
           <div className='heading flexSB'>
-            <h3>DashBoard</h3>
-            <span>VCET / Over All</span>
+            <br />
+        
           </div>
           <Cards />
           <Charts />

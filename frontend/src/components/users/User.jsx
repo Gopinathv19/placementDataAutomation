@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import axios from "axios"
 import "./users.css"
-import { CircularProgress } from '@mui/material'
+import { CircularProgress, Avatar } from '@mui/material'
 
-const User = () => {
-  const [toppers, setToppers] = useState([])
+const User = ({ sectionData }) => {
+  const [toppers, setToppers] = useState(sectionData || [])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -36,10 +36,11 @@ const User = () => {
         toppers.map((value, index) => (
           <div className='cardBox flexSB' key={value.univNo || index}>
             <div className='img'>
-              <img 
-                className='imageCircle' 
-                src={value.cover || '/default-avatar.png'} 
-                alt={value.name} 
+              <Avatar
+                src={value.cover || '/default-avatar.png'}
+                alt={value.name}
+                sx={{ width: 60, height: 60 }}
+                className="profile-avatar"
               />
             </div>
             <div className='title'>

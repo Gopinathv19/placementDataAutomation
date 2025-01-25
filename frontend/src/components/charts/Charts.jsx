@@ -4,7 +4,7 @@ import "./chart.css"
 import ReactApexChart from "react-apexcharts"
 import axios from "axios"
 
-const Charts = () => {
+const Charts = ({ sectionData }) => {
   const[chartData,setChartData] =useState({
     donutData:[],
     barData:[],
