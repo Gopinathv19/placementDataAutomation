@@ -1,11 +1,53 @@
-import React from 'react';
-import { Box, Card, CardContent, Typography, Avatar, Grid, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Card, CardContent, Typography, Avatar, Grid, IconButton, CircularProgress } from '@mui/material';
 import ReactApexChart from 'react-apexcharts';
 import './ProfileCard.css';
 import CloseIcon from '@mui/icons-material/Close';
+import axios from 'axios';
 
 const ProfileCard = ({ studentData, onClose }) => {
-  // Progress chart options
+  const [leetcodeStats, setLeetcodeStats] = useState(null);
+  const [studentScores, setStudentScores] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const leetcodeResponse = await axios.post('https://leetcode.com/graphql', {
+          query: `{
+            matchedUser(username:"${studentData?.leetcodeUsername}"){
+              submitStats: submitStatsGlobal {
+                acSubmissionNum {
+                  difficulty
+                  count
+                }
+              }
+            }
+          }`
+        });
+        
+       
+ 
+        const scoresResponse = await axios.get(`http://localhost:8080/cse/students/${studentData?.universityNo}/scores`);
+      
+        setLeetcodeStats(leetcodeResponse.data.data.matchedUser);
+        setStudentScores(scoresResponse.data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch student statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (studentData?.leetcodeUsername) {
+      fetchData();
+    }
+  }, [studentData]);
+
   const progressOptions = {
     chart: {
       height: 150,
@@ -22,7 +64,8 @@ const ProfileCard = ({ studentData, onClose }) => {
         },
         dataLabels: {
           name: {
-            show: false,
+            show: true,
+            fontSize: '14px',
           },
           value: {
             fontSize: '1.5rem',
@@ -34,28 +77,51 @@ const ProfileCard = ({ studentData, onClose }) => {
     fill: {
       colors: ['#ff4d4d']
     },
-    labels: ['Progress'],
+    labels: ['Total Solved'],
   };
 
-  // Distribution chart options
-  const distributionOptions = {
+  const scoresOptions = {
     chart: {
-      type: 'donut',
+      type: 'bar',
       foreColor: '#fff',
     },
     plotOptions: {
-      pie: {
-        donut: {
-          size: '75%'
-        }
+      bar: {
+        horizontal: true,
+        borderRadius: 6,
       }
     },
-    labels: ['Easy', 'Medium', 'Hard'],
-    colors: ['#00b8a3', '#ffa116', '#ff375f'],
-    legend: {
-      position: 'bottom'
-    }
+    colors: ['#3B82F6'],
+    xaxis: {
+      categories: ['Aptitude', 'Technical', 'Programming', 'Overall'],
+    },
   };
+
+  if (loading) return (
+    <Box className="profile-container" display="flex" justifyContent="center" alignItems="center">
+      <CircularProgress />
+    </Box>
+  );
+
+  if (error) return (
+    <Box className="profile-container" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+      <Card className="error-card">
+        <CardContent>
+          <Typography variant="h6" color="error" gutterBottom>
+            Error Loading Profile
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {error}
+          </Typography>
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <IconButton onClick={onClose} sx={{ color: '#fff' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
+  );
 
   return (
     <Box className="profile-container">
@@ -84,60 +150,53 @@ const ProfileCard = ({ studentData, onClose }) => {
               </Box>
             </Grid>
 
-            {/* Statistics Grid */}
-            <Grid item xs={12} md={4}>
+            {/* LeetCode Progress */}
+            <Grid item xs={12} md={6}>
               <Card className="stats-card">
                 <CardContent>
-                  <Typography variant="h6">Problems Solved</Typography>
+                  <Typography variant="h6">LeetCode Statistics</Typography>
                   <Box className="progress-chart">
                     <ReactApexChart
                       options={progressOptions}
-                      series={[studentData?.problemsSolvedPercentage || 0]}
+                      series={[leetcodeStats?.submitStats?.acSubmissionNum?.[0]?.count || 0]}
                       type="radialBar"
-                      height={200}
+                      height={300}
                     />
-                    <Typography variant="h4" className="total-solved">
-                      {studentData?.problemsSolved || 0}
-                    </Typography>
-                    <Typography variant="subtitle2">
-                      out of {studentData?.totalProblems || 0}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Distribution Chart */}
-            <Grid item xs={12} md={4}>
-              <Card className="stats-card">
-                <CardContent>
-                  <Typography variant="h6">Difficulty Distribution</Typography>
-                  <ReactApexChart
-                    options={distributionOptions}
-                    series={[
-                      studentData?.easySolved || 0,
-                      studentData?.mediumSolved || 0,
-                      studentData?.hardSolved || 0
-                    ]}
-                    type="donut"
-                    height={250}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Recent Activity */}
-            <Grid item xs={12} md={4}>
-              <Card className="stats-card">
-                <CardContent>
-                  <Typography variant="h6">Recent Activity</Typography>
-                  <Box className="activity-list">
-                    {studentData?.recentActivity?.map((activity, index) => (
-                      <Typography key={index} variant="body2" className="activity-item">
-                        {activity}
+                    <Box className="leetcode-stats">
+                      <Typography variant="body2">
+                        Easy: {leetcodeStats?.submitStats?.acSubmissionNum?.[1]?.count || 0}
                       </Typography>
-                    )) || 'No recent activity'}
+                      <Typography variant="body2">
+                        Medium: {leetcodeStats?.submitStats?.acSubmissionNum?.[2]?.count || 0}
+                      </Typography>
+                      <Typography variant="body2">
+                        Hard: {leetcodeStats?.submitStats?.acSubmissionNum?.[3]?.count || 0}
+                      </Typography>
+                    </Box>
                   </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Student Scores */}
+            <Grid item xs={12} md={6}>
+              <Card className="stats-card">
+                <CardContent>
+                  <Typography variant="h6">Performance Scores</Typography>
+                  <ReactApexChart
+                    options={scoresOptions}
+                    series={[{
+                      name: 'Score',
+                      data: [
+                        studentScores?.aptitude || 0,
+                        studentScores?.technical || 0,
+                        studentScores?.programming || 0,
+                        studentScores?.overall || 0
+                      ]
+                    }]}
+                    type="bar"
+                    height={300}
+                  />
                 </CardContent>
               </Card>
             </Grid>

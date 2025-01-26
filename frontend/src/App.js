@@ -4,7 +4,6 @@ import "./App.css"
 import Footer from "./components/footer/Footer"
 import Header from "./components/header/Header"
 import Home from "./components/home/Home"
-import SectionWise from "./components/sectionWise/SectionWise"
 import ProfileCard from "./components/profile/ProfileCard"
 
 function App() {
@@ -40,7 +39,6 @@ function App() {
         ) : (
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/section/:section" element={<SectionWise />} />
             <Route path="*" element={<div>Page not found</div>} />
           </Routes>
         )}
