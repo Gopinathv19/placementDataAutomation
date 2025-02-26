@@ -1,11 +1,9 @@
-import React from "react"
-import Cards from "../cards/Cards"
 import Charts from "../charts/Charts"
 import TableData from "../table/TableData"
 import User from "../users/User"
 
 
-const Home = () => {
+const Home = ({batch}) => {
   return (
     <>
       <section className='home'>
@@ -14,10 +12,10 @@ const Home = () => {
             <br />
         
           </div>
-          <Cards />
-          <Charts />
-          <User />
-          <TableData />
+          
+          <Charts batch={batch} />
+          <User batch={batch} />
+          <TableData batch={batch} />
         </div>
       </section>
     </>

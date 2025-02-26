@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react"
-import "./Table.css"
-import Common from "../../common/Common"
+import { useState, useEffect } from "react"
 import Table from "@mui/material/Table"
 import TableBody from "@mui/material/TableBody"
 import TableCell from "@mui/material/TableCell"
@@ -9,8 +7,11 @@ import TableHead from "@mui/material/TableHead"
 import TableRow from "@mui/material/TableRow"
 import Paper from "@mui/material/Paper"
 import CircularProgress from "@mui/material/CircularProgress"
+import { Menu, MenuItem } from "@mui/material"
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
-const TableData = ({ sectionData }) => {
+const TableData = ({ batch }) => {
   const [apptitudeScore, setApptitudeScore] = useState([])
   const [leetcodeScore, setLeetcodeScore] = useState([])
   const [loading, setLoading] = useState(true)
@@ -25,8 +26,9 @@ const TableData = ({ sectionData }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       try {
-        const Aptiresponse = await fetch("http://localhost:8080/cse/students/scores/apptitude")
+        const Aptiresponse = await fetch(`/cse/v1/students/getStudent/ApptitudeScores/${batch}`)
         const aptiData = await Aptiresponse.json()
         const transformedAptiData = aptiData.map((item, index) => ({
           id: index + 1,
@@ -36,15 +38,16 @@ const TableData = ({ sectionData }) => {
         }))
         setApptitudeScore(transformedAptiData)
 
-        const Leetcoderesponse = await fetch("http://localhost:8080/cse/students/scores/leetcode")
+        const Leetcoderesponse = await fetch(`/cse/v1/students/getStudent/LeetCodeScores/${batch}`)
         const leetcodeData = await Leetcoderesponse.json()
         const transformedLeetcodeData = leetcodeData.map((item, index) => ({
           id: index + 1,
           name: item.name,
-          easy: item.easy || 0,
-          medium: item.medium || 0,
-          hard: item.hard || 0,
-          total: item.total || 0
+          easy: item.easyProblemSolved || 0,
+          medium: item.mediumProblemSolved || 0,
+          hard: item.hardProblemSolved || 0,
+          total: item.totalProblemSolved || 0
+
         }))
         setLeetcodeScore(transformedLeetcodeData)
         setLoading(false)
@@ -55,9 +58,9 @@ const TableData = ({ sectionData }) => {
       }
     }
     fetchData()
-  }, [])
+  }, [batch])
 
-  // Sort handlers for Aptitude
+  // Menu handlers for Aptitude
   const handleAptitudeMenuClick = (event) => {
     setAptitudeAnchorEl(event.currentTarget)
   }
@@ -78,7 +81,7 @@ const TableData = ({ sectionData }) => {
     handleAptitudeMenuClose()
   }
 
-  // Sort handlers for Leetcode
+  // Menu handlers for Leetcode
   const handleLeetcodeMenuClick = (event) => {
     setLeetcodeAnchorEl(event.currentTarget)
   }
@@ -90,123 +93,182 @@ const TableData = ({ sectionData }) => {
   const handleLeetcodeSort = (order) => {
     const sortedData = [...leetcodeScore].sort((a, b) => {
       if (order === 'asc') {
-        return parseFloat(a.total) - parseFloat(b.total)
+        return a.total - b.total
       } else {
-        return parseFloat(b.total) - parseFloat(a.total)
+        return b.total - a.total
       }
     }).map((item, index) => ({ ...item, id: index + 1 }))
     setLeetcodeScore(sortedData)
     handleLeetcodeMenuClose()
   }
 
-  if (loading) return <div className="loading"><CircularProgress /></div>
-  if (error) return <div className="error">Error loading data</div>
+  if (loading) return <div className="flex justify-center items-center h-full"><CircularProgress /></div>
+  if (error) return <div className="text-center text-red-500">Error loading data</div>
 
   return (
-    <>
-      <section className='project'>
-        <div className='table cardBox' style={{marginLeft: "-12px"}}>
-          <Common 
-            title='Aptitude Ranking'
-            onMenuClick={handleAptitudeMenuClick}
-            menuAnchorEl={aptitudeAnchorEl}
-            onMenuClose={handleAptitudeMenuClose}
-            onSortAsc={() => handleAptitudeSort('asc')}
-            onSortDesc={() => handleAptitudeSort('desc')}
-          />
-          <div className='tableBox'>
-            <TableContainer component={Paper} sx={{ boxShadow: "none", borderRadius: "none" }}>
-              <Table
-                className='tableContainer'
-                sx={{
-                  minWidth: 650,
-                  background: "#313844",
-                  border: "none",
-                  "& td ,th": {
-                    color: "rgb(166, 171, 176)",
-                    borderBottom: "1px solid rgb(86, 86, 86)",
-                  },
-                }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Rank</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>University No</TableCell>
-                    <TableCell>Score</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {apptitudeScore.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell component='th' scope='row'>
-                        {row.id}
-                      </TableCell>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.universityNo}</TableCell>
-                      <TableCell>{row.score}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
+    <section className="mt-12 flex flex-col md:flex-row gap-8">
+      {/* Aptitude Table */}
+      <div className="flex-1 bg-gray-800 rounded-lg p-6 transform transition-all duration-300 hover:shadow-xl">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold !text-red-500">Aptitude Ranking</h2>
+          <button
+            onClick={handleAptitudeMenuClick}
+            className="p-2 hover:bg-gray-700 rounded-full text-white"
+          >
+            {aptitudeAnchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </button>
+          <Menu
+            anchorEl={aptitudeAnchorEl}
+            open={Boolean(aptitudeAnchorEl)}
+            onClose={handleAptitudeMenuClose}
+            PaperProps={{
+              style: {
+                backgroundColor: '#1F2937',
+                color: 'white',
+              },
+            }}
+          >
+            <MenuItem onClick={() => handleAptitudeSort('asc')} className="hover:bg-gray-700">
+              Sort Ascending
+            </MenuItem>
+            <MenuItem onClick={() => handleAptitudeSort('desc')} className="hover:bg-gray-700">
+              Sort Descending
+            </MenuItem>
+          </Menu>
         </div>
+        <div className="overflow-x-auto rounded-lg shadow-lg">
+        <TableContainer 
+          component={Paper} 
+          className="bg-gray-800"
+          sx={{ 
+            maxHeight: 400,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#1F2937',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#4B5563',
+              borderRadius: '4px',
+            },
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Rank</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Name</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">University No</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Score</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {apptitudeScore.map((row) => (
+                <TableRow 
+                  key={row.id}
+                  className="bg-gray-700"
+                >
+                  <TableCell className={`border-b border-gray-700 ${row.id <= 3 ? '!text-yellow-300 font-medium' : '!text-white'}`}>
+                    {row.id}
+                  </TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.name}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.universityNo}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.score}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        </div>
+      </div>
 
-        <div className='table cardBox'>
-          <Common 
-            title='Leetcode Ranking'
-            onMenuClick={handleLeetcodeMenuClick}
-            menuAnchorEl={leetcodeAnchorEl}
-            onMenuClose={handleLeetcodeMenuClose}
-            onSortAsc={() => handleLeetcodeSort('asc')}
-            onSortDesc={() => handleLeetcodeSort('desc')}
-          />
-          <div className='tableBox'>
-            <TableContainer component={Paper} sx={{ boxShadow: "none", borderRadius: "none" }}>
-              <Table
-                className='tableContainer'
-                sx={{
-                  minWidth: 650,
-                  background: "#313844",
-                  border: "none",
-                  "& td ,th": {
-                    color: "rgb(166, 171, 176)",
-                    borderBottom: "1px solid rgb(86, 86, 86)",
-                  },
-                }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Rank</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Easy</TableCell>
-                    <TableCell>Medium</TableCell>
-                    <TableCell>Hard</TableCell>
-                    <TableCell>Total</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {leetcodeScore.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell component='th' scope='row'>
-                        {row.id}
-                      </TableCell>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.easy}</TableCell>
-                      <TableCell>{row.medium}</TableCell>
-                      <TableCell>{row.hard}</TableCell>
-                      <TableCell>{row.total}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
+      {/* Leetcode Table - Exactly matching Aptitude table styles */}
+      <div className="flex-1 bg-gray-800 rounded-lg p-6 transform transition-all duration-300 hover:shadow-xl">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold !text-blue-500">Leetcode Ranking</h2>
+          <button
+            onClick={handleLeetcodeMenuClick}
+            className="p-2 hover:bg-gray-700 rounded-full text-white"
+          >
+            {leetcodeAnchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </button>
+          <Menu
+            anchorEl={leetcodeAnchorEl}
+            open={Boolean(leetcodeAnchorEl)}
+            onClose={handleLeetcodeMenuClose}
+            PaperProps={{
+              style: {
+                backgroundColor: '#1F2937',
+                color: 'white',
+              },
+            }}
+          >
+            <MenuItem onClick={() => handleLeetcodeSort('asc')} className="hover:bg-gray-700">
+              Sort Ascending
+            </MenuItem>
+            <MenuItem onClick={() => handleLeetcodeSort('desc')} className="hover:bg-gray-700">
+              Sort Descending
+            </MenuItem>
+          </Menu>
         </div>
-      </section>
-    </>
+        <div className="overflow-x-auto rounded-lg shadow-lg">
+        <TableContainer 
+          component={Paper} 
+          className="bg-gray-800"
+          sx={{ 
+            maxHeight: 400,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#1F2937',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#4B5563',
+              borderRadius: '4px',
+            },
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Rank</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Name</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Easy</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Medium</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Hard</TableCell>
+                <TableCell className="!bg-gray-800 !text-white font-semibold">Total</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {leetcodeScore.map((row) => (
+                <TableRow 
+                  key={row.id}
+                  className="bg-gray-700"
+                >
+                  <TableCell className={`border-b border-gray-700 ${row.id <= 3 ? '!text-yellow-300 font-medium' : '!text-white'}`}>
+                    {row.id}
+                  </TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.name}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.easy}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.medium}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.hard}</TableCell>
+                  <TableCell className="!text-white border-b border-gray-700">{row.total}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        </div>
+      </div>
+    </section>
   )
 }
 
 export default TableData
+
+
+ 

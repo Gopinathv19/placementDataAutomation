@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from "axios"
-import "./users.css"
 import { CircularProgress, Avatar } from '@mui/material'
 
-const User = ({ sectionData }) => {
-  const [toppers, setToppers] = useState(sectionData || [])
+const User = ({batch}) => {
+  const [toppers, setToppers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -12,8 +11,7 @@ const User = ({ sectionData }) => {
     const fetchToppers = async () => {
       try {
         setLoading(true)
-        // Change to http instead of https
-        const response = await axios.get("http://localhost:8080/cse/toppers")
+        const response = await axios.get(`/cse/v1/students/getToppers/${batch}`)
         setToppers(response.data)
         setError(null)
       } catch (error) {
@@ -27,30 +25,47 @@ const User = ({ sectionData }) => {
   }, [])
 
   return (
-    <section className='users grid'>
+    <section className='mt-8'>
       {loading ? (
-        <div className="loading"><CircularProgress/></div>
+        <div className="flex justify-center"><CircularProgress/></div>
       ) : error ? (
-        <p>Error: {error}</p>
+        <p className="text-center text-red-500">Error: {error}</p>
       ) : (
-        toppers.map((value, index) => (
-          <div className='cardBox flexSB' key={value.univNo || index}>
-            <div className='img'>
+        <div className="flex justify-between items-center gap-8">
+          {/* Left Side - Aptitude Topper */}
+          <div className="w-[400px] bg-gray-800 rounded-lg p-4">
+            <div className="flex items-center gap-4">
               <Avatar
-                src={value.cover || '/default-avatar.png'}
-                alt={value.name}
-                sx={{ width: 60, height: 60 }}
-                className="profile-avatar"
+                src={toppers[0]?.cover || '/default-avatar.png'}
+                alt={toppers[0]?.name}
+                className="w-12 h-12 border-2 border-blue-500"
               />
-            </div>
-            <div className='title'>
-              <h3>{value.name}</h3>
-              <h4>{value.title}</h4>
-              <p>{value.univNo}</p>
-              <span>{value.greets}</span>
+              <div>
+                <h3 className="text-lg text-white font-semibold">{toppers[0]?.name}</h3>
+                <p className="text-sm text-gray-400">Aptitude Topper</p>
+                <p className="text-xs text-gray-500">{toppers[0]?.univNo}</p>
+                <p className="text-sm text-yellow-400 mt-1">{toppers[0]?.greets}</p>
+              </div>
             </div>
           </div>
-        ))
+
+          {/* Right Side - Leetcode Topper */}
+          <div className="w-[400px] bg-gray-800 rounded-lg p-4">
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={toppers[1]?.cover || '/default-avatar.png'}
+                alt={toppers[1]?.name}
+                className="w-12 h-12 border-2 border-blue-500"
+              />
+              <div>
+                <h3 className="text-lg text-white font-semibold">{toppers[1]?.name}</h3>
+                <p className="text-sm text-gray-400">LeetCode Topper</p>
+                <p className="text-xs text-gray-500">{toppers[1]?.univNo}</p>
+                <p className="text-sm text-yellow-400 mt-1">{toppers[1]?.greets}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   )

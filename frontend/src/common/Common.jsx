@@ -1,4 +1,4 @@
-import React from "react"
+import PropTypes from 'prop-types'
 import IconButton from "@mui/material/IconButton"
 import Menu from "@mui/material/Menu"
 import MenuItem from "@mui/material/MenuItem"
@@ -36,6 +36,15 @@ const Common = ({
       </Menu>
     </div>
   )
+}
+
+Common.propTypes = {
+  title: PropTypes.string.isRequired,
+  onMenuClick: PropTypes.func.isRequired,
+  menuAnchorEl: PropTypes.object,
+  onMenuClose: PropTypes.func.isRequired,
+  onSortAsc: PropTypes.func.isRequired,
+  onSortDesc: PropTypes.func.isRequired
 }
 
 export default Common

@@ -1,13 +1,11 @@
-import React,{useState,useEffect} from "react"
+import {useState,useEffect} from "react"
 import Common from "../../common/Common"
-import "./chart.css"
 import ReactApexChart from "react-apexcharts"
 import axios from "axios"
 
-const Charts = ({ sectionData }) => {
+const Charts = ({ batch }) => {
   const[chartData,setChartData] =useState({
     donutData:[],
-    barData:[],
     lineData:{
       leetcode:[],
       aptitude:[],
@@ -16,18 +14,32 @@ const Charts = ({ sectionData }) => {
   })
 
   useEffect(() => {
-    const fetchChartData = async () => {  // 'async' was misspelled as 'assync'
+    const fetchChartData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/cse/students/charts');
-        const { donutData, barData, lineData } = response.data;
-        setChartData({ donutData, barData, lineData });
+        const response = await axios.get(`/cse/v1/students/charts/${batch}`);
+        const { donutData, lineData } = response.data;
+
+        // checking the response from the backend
+        console.log(response.data)
+
+        // Check if the data is empty
+        if (donutData.length === 0 && lineData.leetcode.length === 0) {
+          setChartData({ donutData: [], lineData: { leetcode: [], aptitude: [], overall: [] } });
+        } else {
+          setChartData({ donutData, lineData });
+        }
       } catch (error) {
         console.error('Error fetching chart data:', error);
       }
-    }; 
-    
+    };
     fetchChartData();
-  }, []);
+  }, [batch]);
+
+  // Render nothing if there's no data
+  if (chartData.donutData.length === 0 && chartData.lineData.leetcode.length === 0) {
+    return <p>No data available for the selected batch.</p>;
+  }
+
   const data = {
     series: chartData.donutData,
     options: {
@@ -53,7 +65,7 @@ const Charts = ({ sectionData }) => {
           fillColors: ['#3B82F6', '#10B981', '#F59E0B']
         }
       },
-      labels: ['Easy', 'Medium', 'Hard'],
+      labels: ['A', 'B', 'C'],
       dataLabels: {
         enabled: false,
       },
@@ -102,105 +114,19 @@ const Charts = ({ sectionData }) => {
     },
   }
 
-  const bardata = {
-    series: [
-      {
-        name: "Performance",
-        data: chartData.barData,
-      },
-    ],
-    options: {
-      chart: {
-        type: "bar",
-        height: 350,
-        foreColor: "#6B7280",
-        animations: {
-          enabled: true,
-          easing: 'easeinout',
-          speed: 800,
-          animateGradually: {
-            enabled: true,
-            delay: 150
-          },
-          dynamicAnimation: {
-            enabled: true,
-            speed: 350
-          }
-        }
-      },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: "55%",
-          endingShape: "rounded",
-          borderRadius: 8,
-        },
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        show: true,
-        width: 2,
-        colors: ['transparent']
-      },
-      xaxis: {
-        categories: ['Verbal', 'Logical', 'Numerical'],
-        labels: {
-          style: {
-            colors: '#6B7280'
-          }
-        }
-      },
-      yaxis: {
-        title: {
-          text: 'Score (%)',
-          style: {
-            color: '#6B7280'
-          }
-        },
-        labels: {
-          style: {
-            colors: '#6B7280'
-          }
-        }
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'light',
-          type: "vertical",
-          shadeIntensity: 0.25,
-          gradientToColors: undefined,
-          inverseColors: true,
-          opacityFrom: 0.85,
-          opacityTo: 0.85,
-        },
-        colors: ['#3B82F6']
-      },
-      tooltip: {
-        y: {
-          formatter: function (val) {
-            return val + "%"
-          }
-        }
-      }
-    },
-  }
-
   const line = {
     series: [
       {
-        name: "Leetcode",
-        data: chartData.lineData.leetcode,
+        name: "CSE A ",
+        data: chartData.lineData.csea,
       },
       {
-        name: "Aptitude",
-        data: chartData.lineData.aptitude,
+        name: "CSE B",
+        data: chartData.lineData.cseb,
       },
       {
-        name: "Overall",
-        data: chartData.lineData.overall,
+        name: "CSE C",
+        data: chartData.lineData.csec,
       }
     ],
     options: {
@@ -246,7 +172,7 @@ const Charts = ({ sectionData }) => {
       },
       yaxis: {
         title: {
-          text: 'Score (%)',
+          text: '[Month_Name]',
           style: {
             color: '#6B7280'
           }
@@ -279,16 +205,12 @@ const Charts = ({ sectionData }) => {
 
   return (
     <>
-      <section className='charts grid2'>
-        <div className='cardBox'>
+      <section className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-gray-700 rounded-md p-5">
           <Common title='Leetcode Performance' />
           <ReactApexChart options={data.options} series={data.series} type='donut' height={350} />
         </div>
-        <div className='cardBox'>
-          <Common title='Aptitude Performance' />
-          <ReactApexChart options={bardata.options} series={bardata.series} type='bar' height={350} />
-        </div>
-        <div className='cardBox'>
+        <div className="bg-gray-700 rounded-md p-5">
           <Common title='Overall Performance' />
           <ReactApexChart options={line.options} series={line.series} type='line' height={350} />
         </div>
